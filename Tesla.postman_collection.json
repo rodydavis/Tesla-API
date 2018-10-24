@@ -1,0 +1,201 @@
+{
+	"info": {
+		"_postman_id": "aacdfa34-4584-4033-a176-6859cb5810e9",
+		"name": "Tesla",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "461fa9ca-6408-4ac3-b605-c5218993d913",
+						"type": "text/javascript",
+						"exec": [
+							"var response = JSON.parse(responseBody);",
+							"pm.environment.set(\"token\", response.access_token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://owner-api.teslamotors.com/oauth/token",
+					"protocol": "https",
+					"host": [
+						"owner-api",
+						"teslamotors",
+						"com"
+					],
+					"path": [
+						"oauth",
+						"token"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Token",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"disabled": false
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "rdavis@unifycrm.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Unify2018!",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/Token",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"Token"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Cache-Control",
+							"value": "no-cache",
+							"name": "Cache-Control",
+							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
+						},
+						{
+							"key": "Content-Length",
+							"value": "692",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json;charset=UTF-8",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 03 Oct 2018 13:53:13 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Expires",
+							"value": "-1",
+							"name": "Expires",
+							"description": "Gives the date/time after which the response is considered stale"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache",
+							"name": "Pragma",
+							"description": "Implementation-specific headers that may have various effects anywhere along the request-response chain."
+						},
+						{
+							"key": "Server",
+							"value": "Microsoft-IIS/10.0",
+							"name": "Server",
+							"description": "A name for the server"
+						},
+						{
+							"key": "Set-Cookie",
+							"value": ".AspNet.Cookies=ZcYJNdwBtM0_8rmjB54iuEot3RqeesDQWGmNy7qPeq7Hu0eZ4_2J3zAePpHXtvAMrRiRIm-4h1wXMiRLxIzFtjDzSF2hiTzo0mCuBSoau2sVBs2QReBdhGG2KAZpufysq0ElDmv8LmSf59njsqBfWJEAuJ2B0uqS--Fm8fvkU_3HsdurIWwhPlFk3CZ6isz2X-kEQGW36nNU2SfKdh10rB01gluxu3Un4oKCkj2xfgI09ul7l1eQIsvJcD1dJ5P3206_j3KxTGUXwlFYAySgrLTJIfoXzYQnhz5m84ZiZ1Pm3d9W_6s2DnpYk1qb-L8zcC1mm1A96ftcyIsazW7vMVDhNKa77cCZKvljewEMgp_uFD-SG-82arc4DOK_YUZYLOU1nRz6YldluXFiXtQUVmw658vUxmSXJJemMMKmMSwk3vVwN--pujYjazHX_KDzpBgK26SrV-0yKS_AF3smU3LH7yqw30V8CkniJcXRphU; path=/; HttpOnly",
+							"name": "Set-Cookie",
+							"description": "an HTTP cookie"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "ASP.NET",
+							"name": "X-Powered-By",
+							"description": "Specifies the technology (ASP.NET, PHP, JBoss, e.g.) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)"
+						},
+						{
+							"key": "X-SourceFiles",
+							"value": "=?UTF-8?B?QzpcVXNlcnNccm9keWRhdmlzXHNvdXJjZVxyZXBvc1xVbmlmeVdlYkFQSVxVbmlmeVdlYkFQSVxUb2tlbg==?=",
+							"name": "X-SourceFiles",
+							"description": "Custom header"
+						}
+					],
+					"cookie": [
+						{
+							"expires": "Mon Jan 18 2038 22:14:07 GMT-0500 (EST)",
+							"httpOnly": true,
+							"domain": "localhost",
+							"path": "/",
+							"secure": false,
+							"value": "ZcYJNdwBtM0_8rmjB54iuEot3RqeesDQWGmNy7qPeq7Hu0eZ4_2J3zAePpHXtvAMrRiRIm-4h1wXMiRLxIzFtjDzSF2hiTzo0mCuBSoau2sVBs2QReBdhGG2KAZpufysq0ElDmv8LmSf59njsqBfWJEAuJ2B0uqS--Fm8fvkU_3HsdurIWwhPlFk3CZ6isz2X-kEQGW36nNU2SfKdh10rB01gluxu3Un4oKCkj2xfgI09ul7l1eQIsvJcD1dJ5P3206_j3KxTGUXwlFYAySgrLTJIfoXzYQnhz5m84ZiZ1Pm3d9W_6s2DnpYk1qb-L8zcC1mm1A96ftcyIsazW7vMVDhNKa77cCZKvljewEMgp_uFD-SG-82arc4DOK_YUZYLOU1nRz6YldluXFiXtQUVmw658vUxmSXJJemMMKmMSwk3vVwN--pujYjazHX_KDzpBgK26SrV-0yKS_AF3smU3LH7yqw30V8CkniJcXRphU",
+							"key": ".AspNet.Cookies"
+						}
+					],
+					"body": "{\"access_token\":\"84W95uDzgp6PncAaW9y9DH-j21XJerEw0YzJpRedO9bRmulmJtEyaQ4N5dsmvsMa9CRN_-TqGcReDgMQh02CPtDSpYiPMeEFNnGjluII0MmYd1ytOB2dOGATe-IiNXJukLqBkhpzD-VTiTmWOFQHd-JfM3mA7qcY3MMfhuzzP1HTvVtVJdbHY42xzBxoYBODDkNMY1ggxwnlxE-wp6WYmG1tlYdOupdgmYnn84DFzY4HYMmk5r5WDfjJXENhPcnUy-n_65fIbeXFUIJIXTk59fP-llETS_JxOQfwddlcZfTUE2gtsNCXkso1_z_u-BrSJnR50PKJvcBfor6jxu4qPkuxez2dm95MsIq1GRbS6hKmYhSpp_6LN7tuRyfj3TlP0FDBzQhiwndPiYaRwPPXgCBlsiYFJoD0LjdU2OrSnXzzUW6jk_mquT41L8kmD2qwJH61rC_Zyu_DLzzyfdkJlTwL5cyOZFqfR7dFUVBeKh265L0ATQ-2G7RUO4TGRE0Q\",\"token_type\":\"bearer\",\"expires_in\":1209599,\"userName\":\"rdavis@unifycrm.com\",\".issued\":\"Wed, 03 Oct 2018 13:53:12 GMT\",\".expires\":\"Wed, 17 Oct 2018 13:53:12 GMT\"}"
+				}
+			]
+		}
+	]
+}
