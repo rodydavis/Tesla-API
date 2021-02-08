@@ -1,201 +1,2449 @@
 {
 	"info": {
-		"_postman_id": "aacdfa34-4584-4033-a176-6859cb5810e9",
+		"_postman_id": "1466e372-1cd3-4024-9063-93a6b6be7dc8",
 		"name": "Tesla",
+		"description": "Tesla API based on https://www.teslaapi.io/",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Token",
-			"event": [
+			"name": "Authentication",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"id": "461fa9ca-6408-4ac3-b605-c5218993d913",
-						"type": "text/javascript",
-						"exec": [
-							"var response = JSON.parse(responseBody);",
-							"pm.environment.set(\"token\", response.access_token);"
-						]
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer"
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
+					"name": "OAuth",
+					"item": [
 						{
-							"key": "grant_type",
-							"value": "password",
-							"type": "text"
+							"name": "Obtain Access Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+											"    pm.environment.set(\"access_token\",jsonData.access_token);",
+											"});",
+											"pm.test(\"repsonse has attribute: access_token\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.access_token).is.a('string');",
+											"});",
+											"pm.test(\"repsonse has attribute: refresh_token\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.refresh_token).is.a('string');",
+											"});",
+											"pm.test(\"repsonse has attribute: token_type\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.token_type).is.eql('bearer');",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "oauth2",
+									"oauth2": [
+										{
+											"key": "state",
+											"value": "{{state}}",
+											"type": "string"
+										},
+										{
+											"key": "addTokenTo",
+											"value": "header",
+											"type": "string"
+										},
+										{
+											"key": "useBrowser",
+											"value": false,
+											"type": "boolean"
+										},
+										{
+											"key": "clientId",
+											"value": "ownerapi",
+											"type": "string"
+										},
+										{
+											"key": "client_authentication",
+											"value": "body",
+											"type": "string"
+										},
+										{
+											"key": "scope",
+											"value": "openid email offline_access",
+											"type": "string"
+										},
+										{
+											"key": "accessTokenUrl",
+											"value": "https://{{auth_url}}/oauth2/v3/token",
+											"type": "string"
+										},
+										{
+											"key": "authUrl",
+											"value": "https://{{auth_url}}/oauth2/v3/authorize",
+											"type": "string"
+										},
+										{
+											"key": "redirect_uri",
+											"value": "https://auth.tesla.com/void/callback",
+											"type": "string"
+										},
+										{
+											"key": "tokenName",
+											"value": "tesla_token",
+											"type": "string"
+										},
+										{
+											"key": "grant_type",
+											"value": "authorization_code_with_pkce",
+											"type": "string"
+										},
+										{
+											"key": "challengeAlgorithm",
+											"value": "S256",
+											"type": "string"
+										},
+										{
+											"key": "tokenType",
+											"value": "Bearer",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"grant_type\": \"urn:ietf:params:oauth:grant-type:jwt-bearer\",\n    \"client_id\": \"{{client_id}}\",\n    \"client_secret\": \"{{client_secret}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{base_url}}/oauth/token",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"oauth",
+										"token"
+									],
+									"query": [
+										{
+											"key": "grant_type",
+											"value": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+											"description": "The type of OAuth grant. Always \"urn:ietf:params:oauth:grant-type:jwt-bearer\"",
+											"disabled": true
+										}
+									]
+								},
+								"description": "This endpoint follows [RFC 7523](https://tools.ietf.org/html/rfc7523) to exchange a JWT access token from the SSO service for an access token usable by the Owner API.\n\nThe current client ID and secret are [available here](https://pastebin.com/pS7Z6yyP).\n\nYou will get back an `access_token` which is treated as an [OAuth 2.0 Bearer Token](https://oauth.net/2/bearer-tokens/). This token is passed along in an `Authorization` header with all future requests"
+							},
+							"response": []
 						},
 						{
-							"key": "client_id",
-							"value": "81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384",
-							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "{{password}}",
-							"type": "text"
+							"name": "Revoke Access Token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"    pm.environment.set(\"access_token\", null);",
+											"    pm.environment.set(\"refresh_token\", null);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"token\": \"{{access_token}}\"\n}"
+								},
+								"url": {
+									"raw": "https://{{base_url}}/oauth/revoke",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"oauth",
+										"revoke"
+									]
+								},
+								"description": "Revokes the `{access_token}` issued by the obtain token command"
+							},
+							"response": []
 						}
 					]
 				},
-				"url": {
-					"raw": "https://owner-api.teslamotors.com/oauth/token",
-					"protocol": "https",
-					"host": [
-						"owner-api",
-						"teslamotors",
-						"com"
-					],
-					"path": [
-						"oauth",
-						"token"
-					]
-				}
-			},
-			"response": [
 				{
-					"name": "Token",
-					"originalRequest": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/x-www-form-urlencoded",
-								"disabled": false
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
+					"name": "User",
+					"item": [
+						{
+							"name": "Powerwall Order Entry Data",
+							"event": [
 								{
-									"key": "grant_type",
-									"value": "password",
-									"type": "text"
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"response has attribute: feature_enabled\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.response.feature_enabled).is.a('boolean');",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/users/powerwall_order_entry_data",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"users",
+										"powerwall_order_entry_data"
+									]
 								},
+								"description": "Information about powerwall orders\n"
+							},
+							"response": [
 								{
-									"key": "username",
-									"value": "rdavis@unifycrm.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "Unify2018!",
-									"type": "text"
+									"name": "Powerwall Order Entry Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/users/powerwall_order_entry_data",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"users",
+												"powerwall_order_entry_data"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:19:07 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "38"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "e6fd6cf755b410b186b98af37c6de335"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"7738a426620e1bb65674239c9b6538d1\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "4e00cee8a7014c2bc789a386828cfddc4e00cee8a7014c2bc789a386828cfddc"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.007863"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"feature_enabled\": false\n    }\n}"
 								}
 							]
 						},
-						"url": {
-							"raw": "{{domain}}/Token",
-							"host": [
-								"{{domain}}"
+						{
+							"name": "Onboarding Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
 							],
-							"path": [
-								"Token"
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/users/onboarding_data",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"users",
+										"onboarding_data"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Onboarding Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/users/onboarding_data",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"users",
+												"onboarding_data"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:29:39 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "158"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "57f6d94cc8aaa810530e95cbc4167848"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"bac900bb0ff30bfd5919c955a89ff391\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "738f01dbb7ed16f37ae8282820be0440738f01dbb7ed16f37ae8282820be0440"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.022700"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"entry_point_text\": \"Video Guides\",\n        \"show_postdelivery_on_startup\": false,\n        \"display_page_on_startup\": null,\n        \"show_on_login\": false,\n        \"show_in_menu\": true\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Referral Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"response has attribute: feature_enabled\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.response.feature_enabled).is.a('boolean');",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/users/referral_data",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"users",
+										"referral_data"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Referral Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/users/referral_data",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"users",
+												"referral_data"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:29:14 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "38"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "7324339d58b926a29aa9a7a28720b255"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"7738a426620e1bb65674239c9b6538d1\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "fda1165222d5700f0de87200e92e9ea4fda1165222d5700f0de87200e92e9ea4"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.008448"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"feature_enabled\": false\n    }\n}"
+								}
 							]
 						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Cache-Control",
-							"value": "no-cache",
-							"name": "Cache-Control",
-							"description": "Tells all caching mechanisms from server to client whether they may cache this object. It is measured in seconds"
-						},
-						{
-							"key": "Content-Length",
-							"value": "692",
-							"name": "Content-Length",
-							"description": "The length of the response body in octets (8-bit bytes)"
-						},
-						{
-							"key": "Content-Type",
-							"value": "application/json;charset=UTF-8",
-							"name": "Content-Type",
-							"description": "The mime type of this content"
-						},
-						{
-							"key": "Date",
-							"value": "Wed, 03 Oct 2018 13:53:13 GMT",
-							"name": "Date",
-							"description": "The date and time that the message was sent"
-						},
-						{
-							"key": "Expires",
-							"value": "-1",
-							"name": "Expires",
-							"description": "Gives the date/time after which the response is considered stale"
-						},
-						{
-							"key": "Pragma",
-							"value": "no-cache",
-							"name": "Pragma",
-							"description": "Implementation-specific headers that may have various effects anywhere along the request-response chain."
-						},
-						{
-							"key": "Server",
-							"value": "Microsoft-IIS/10.0",
-							"name": "Server",
-							"description": "A name for the server"
-						},
-						{
-							"key": "Set-Cookie",
-							"value": ".AspNet.Cookies=ZcYJNdwBtM0_8rmjB54iuEot3RqeesDQWGmNy7qPeq7Hu0eZ4_2J3zAePpHXtvAMrRiRIm-4h1wXMiRLxIzFtjDzSF2hiTzo0mCuBSoau2sVBs2QReBdhGG2KAZpufysq0ElDmv8LmSf59njsqBfWJEAuJ2B0uqS--Fm8fvkU_3HsdurIWwhPlFk3CZ6isz2X-kEQGW36nNU2SfKdh10rB01gluxu3Un4oKCkj2xfgI09ul7l1eQIsvJcD1dJ5P3206_j3KxTGUXwlFYAySgrLTJIfoXzYQnhz5m84ZiZ1Pm3d9W_6s2DnpYk1qb-L8zcC1mm1A96ftcyIsazW7vMVDhNKa77cCZKvljewEMgp_uFD-SG-82arc4DOK_YUZYLOU1nRz6YldluXFiXtQUVmw658vUxmSXJJemMMKmMSwk3vVwN--pujYjazHX_KDzpBgK26SrV-0yKS_AF3smU3LH7yqw30V8CkniJcXRphU; path=/; HttpOnly",
-							"name": "Set-Cookie",
-							"description": "an HTTP cookie"
-						},
-						{
-							"key": "X-Powered-By",
-							"value": "ASP.NET",
-							"name": "X-Powered-By",
-							"description": "Specifies the technology (ASP.NET, PHP, JBoss, e.g.) supporting the web application (version details are often in X-Runtime, X-Version, or X-AspNet-Version)"
-						},
-						{
-							"key": "X-SourceFiles",
-							"value": "=?UTF-8?B?QzpcVXNlcnNccm9keWRhdmlzXHNvdXJjZVxyZXBvc1xVbmlmeVdlYkFQSVxVbmlmeVdlYkFQSVxUb2tlbg==?=",
-							"name": "X-SourceFiles",
-							"description": "Custom header"
-						}
-					],
-					"cookie": [
-						{
-							"expires": "Mon Jan 18 2038 22:14:07 GMT-0500 (EST)",
-							"httpOnly": true,
-							"domain": "localhost",
-							"path": "/",
-							"secure": false,
-							"value": "ZcYJNdwBtM0_8rmjB54iuEot3RqeesDQWGmNy7qPeq7Hu0eZ4_2J3zAePpHXtvAMrRiRIm-4h1wXMiRLxIzFtjDzSF2hiTzo0mCuBSoau2sVBs2QReBdhGG2KAZpufysq0ElDmv8LmSf59njsqBfWJEAuJ2B0uqS--Fm8fvkU_3HsdurIWwhPlFk3CZ6isz2X-kEQGW36nNU2SfKdh10rB01gluxu3Un4oKCkj2xfgI09ul7l1eQIsvJcD1dJ5P3206_j3KxTGUXwlFYAySgrLTJIfoXzYQnhz5m84ZiZ1Pm3d9W_6s2DnpYk1qb-L8zcC1mm1A96ftcyIsazW7vMVDhNKa77cCZKvljewEMgp_uFD-SG-82arc4DOK_YUZYLOU1nRz6YldluXFiXtQUVmw658vUxmSXJJemMMKmMSwk3vVwN--pujYjazHX_KDzpBgK26SrV-0yKS_AF3smU3LH7yqw30V8CkniJcXRphU",
-							"key": ".AspNet.Cookies"
-						}
-					],
-					"body": "{\"access_token\":\"84W95uDzgp6PncAaW9y9DH-j21XJerEw0YzJpRedO9bRmulmJtEyaQ4N5dsmvsMa9CRN_-TqGcReDgMQh02CPtDSpYiPMeEFNnGjluII0MmYd1ytOB2dOGATe-IiNXJukLqBkhpzD-VTiTmWOFQHd-JfM3mA7qcY3MMfhuzzP1HTvVtVJdbHY42xzBxoYBODDkNMY1ggxwnlxE-wp6WYmG1tlYdOupdgmYnn84DFzY4HYMmk5r5WDfjJXENhPcnUy-n_65fIbeXFUIJIXTk59fP-llETS_JxOQfwddlcZfTUE2gtsNCXkso1_z_u-BrSJnR50PKJvcBfor6jxu4qPkuxez2dm95MsIq1GRbS6hKmYhSpp_6LN7tuRyfj3TlP0FDBzQhiwndPiYaRwPPXgCBlsiYFJoD0LjdU2OrSnXzzUW6jk_mquT41L8kmD2qwJH61rC_Zyu_DLzzyfdkJlTwL5cyOZFqfR7dFUVBeKh265L0ATQ-2G7RUO4TGRE0Q\",\"token_type\":\"bearer\",\"expires_in\":1209599,\"userName\":\"rdavis@unifycrm.com\",\".issued\":\"Wed, 03 Oct 2018 13:53:12 GMT\",\".expires\":\"Wed, 17 Oct 2018 13:53:12 GMT\"}"
+					]
 				}
 			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "List",
+					"item": [
+						{
+							"name": "List Products",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/products",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"products"
+									]
+								},
+								"description": "Returns all products including vehicles, powerwalls, and energy sites.\n"
+							},
+							"response": [
+								{
+									"name": "List Products",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/products",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"products"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:43:57 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept-Encoding"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "1037dfadf3f8c8ffe4d7f60d14bab5a4"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"cc7db2fb9542a44f0063458adb3f7f36\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "68b22ccc32a76e3e8178863b78cf155d68b22ccc32a76e3e8178863b78cf155d"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.012195"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": [\n        {\n            \"energy_site_id\": 100000000000,\n            \"resource_type\": \"solar\",\n            \"id\": \"a41f5979-d9fd-4d39-9f2e-f40190899c37\",\n            \"asset_site_id\": \"d7d77dcb-7d2d-47c0-a891-602a773422ca\",\n            \"solar_power\": 560,\n            \"solar_type\": \"pv_panel\",\n            \"sync_grid_alert_enabled\": false,\n            \"breaker_alert_enabled\": false,\n            \"components\": {\n                \"battery\": false,\n                \"solar\": true,\n                \"solar_type\": \"pv_panel\",\n                \"grid\": true,\n                \"load_meter\": false,\n                \"market_type\": \"residential\"\n            }\n        },\n        {\n            \"energy_site_id\": 100000000001,\n            \"resource_type\": \"battery\",\n            \"site_name\": \"My Home\",\n            \"id\": \"XXXXXXXXXXX-XXXXX\",\n            \"gateway_id\": \"XXXXXX-XX-X--XXXXXXXXXXXXX\",\n            \"asset_site_id\": \"69828b29-83f7-4901-b6a3-17fcc7c8db5b\",\n            \"energy_left\": 25203.842105263164,\n            \"total_pack_energy\": 27707,\n            \"percentage_charged\": 90.96561195821693,\n            \"battery_type\": \"ac_powerwall\",\n            \"backup_capable\": true,\n            \"battery_power\": 990,\n            \"sync_grid_alert_enabled\": true,\n            \"breaker_alert_enabled\": false,\n            \"components\": {\n                \"battery\": true,\n                \"battery_type\": \"ac_powerwall\",\n                \"solar\": true,\n                \"solar_type\": \"pv_panel\",\n                \"grid\": true,\n                \"load_meter\": true,\n                \"market_type\": \"residential\"\n            }\n        }\n    ],\n    \"count\": 2\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Vehicles",
+			"item": [
+				{
+					"name": "List",
+					"item": [
+						{
+							"name": "Retrieve vehicle list",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var response = JSON.parse(responseBody);",
+											"pm.environment.set(\":vehicleId\", response.response[0].id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles"
+									]
+								},
+								"description": "Retrieve a list of all vehicle registered for the authenticated user"
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve vehicle meta by id",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}"
+									]
+								},
+								"description": "Retrieve a information about a specific vehicle registered for the authenticated user using its `id`"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "State and Settings",
+					"item": [
+						{
+							"name": "Retrieve vehicle data",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/vehicle_data",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"vehicle_data"
+									]
+								},
+								"description": "Retrieve detailled information about a specific vehicle registered for the authenticated user using its `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve vehicle service data",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/service_data",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"service_data"
+									]
+								},
+								"description": "Retrieve detailled information about a specific vehicle registered for the authenticated user using its `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve whether mobile access is enabled",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/mobile_enabled",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"mobile_enabled"
+									]
+								},
+								"description": "Check if mobile access is enabled on the particular vehicle.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve charge state",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/data_request/charge_state",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"data_request",
+										"charge_state"
+									]
+								},
+								"description": "Charge state information including battery limit, charge miles, charge voltage, charge phases, current, charge management, and battery heater status by vehicle's `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve climate state",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/data_request/climate_state",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"data_request",
+										"climate_state"
+									]
+								},
+								"description": "Climate settings including seats, vents battery, steering wheel, and preconditioning state us vehilce's `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve drive state",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/data_request/drive_state",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"data_request",
+										"drive_state"
+									]
+								},
+								"description": "Drive state including latitude, longitude, and heading of the vehicle referenced by `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Retrieve GUI settings",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/data_request/gui_settings",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"data_request",
+										"gui_settings"
+									]
+								},
+								"description": "Localization settings including distance units, temperature units, charge units, and clock hour style of the vehicle referenced by `id`.\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						}
+					],
+					"description": "Obtain information about the vehicle and its setting, change settings"
+				},
+				{
+					"name": "Commands",
+					"item": [
+						{
+							"name": "Wake up the vehicle",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/wake_up",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"wake_up"
+									]
+								},
+								"description": "Wake up the vehicle."
+							},
+							"response": []
+						},
+						{
+							"name": "Door Unlock",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/door_unlock",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"door_unlock"
+									]
+								},
+								"description": "Unlock doors of the vehicle.\n\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Door lock",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/door_lock",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"door_lock"
+									]
+								},
+								"description": "Unlock doors of the vehicle.\n\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Honk the horn",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/honk_horn",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"honk_horn"
+									]
+								},
+								"description": "Honk the horn of the vehicle.\n\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Flash Lights",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/flash_lights",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"flash_lights"
+									]
+								},
+								"description": "Honk the horn of the vehicle.\n\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Start HVAC",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/auto_conditioning_start",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"auto_conditioning_start"
+									]
+								},
+								"description": "Start vehicle climate control system. The vehicle will automatically determine whether to heat or cool based on set temperature.\n\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						},
+						{
+							"name": "Stop HVAC",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"type": "text",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicles/{{:vehicleId}}/command/auto_conditioning_stop",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicles",
+										"{{:vehicleId}}",
+										"command",
+										"auto_conditioning_stop"
+									]
+								},
+								"description": "Stop vehicle climate control system\n\nTo avoid ´408`repsonse:\n\n```\n{\n    \"response\": null,\n    \"error\": \"vehicle unavailable: {:error=>\\\"vehicle unavailable:\\\"}\",\n    \"error_description\": \"\"\n}\n```\n\nYou might need to wake up the vehicle first."
+							},
+							"response": []
+						}
+					],
+					"description": "Execute commands on the vehicle"
+				}
+			]
+		},
+		{
+			"name": "Powerwalls",
+			"item": [
+				{
+					"name": "State and Settings",
+					"item": [
+						{
+							"name": "Battery Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"powerwalls",
+										"{{battery_id}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Battery Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"powerwalls",
+												"{{battery_id}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:48:41 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept-Encoding"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "d124808820299d5f16859114558dd535"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"296ad9a0b3d2fb29ee00605bfc812c8c\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "087e6a95f46aaf3e24c2de9bd0118a48087e6a95f46aaf3e24c2de9bd0118a48"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.529151"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"site_name\": \"My Home\",\n        \"energy_left\": 25101.736842105263,\n        \"total_pack_energy\": 27707,\n        \"grid_status\": \"Active\",\n        \"backup\": {\n            \"backup_reserve_percent\": 30,\n            \"events\": null\n        },\n        \"user_settings\": {\n            \"storm_mode_enabled\": true,\n            \"sync_grid_alert_enabled\": false,\n            \"breaker_alert_enabled\": false\n        },\n        \"components\": {\n            \"solar\": true,\n            \"solar_type\": \"pv_panel\",\n            \"battery\": true,\n            \"grid\": true,\n            \"backup\": true,\n            \"gateway\": \"teg\",\n            \"load_meter\": true,\n            \"tou_capable\": true,\n            \"storm_mode_capable\": true,\n            \"flex_energy_request_capable\": false,\n            \"car_charging_data_supported\": false,\n            \"off_grid_vehicle_charging_reserve_supported\": true,\n            \"vehicle_charging_performance_view_enabled\": false,\n            \"vehicle_charging_solar_offset_view_enabled\": false,\n            \"battery_solar_offset_view_enabled\": true,\n            \"battery_type\": \"ac_powerwall\",\n            \"configurable\": false,\n            \"grid_services_enabled\": false\n        },\n        \"default_real_mode\": \"autonomous\",\n        \"operation\": \"autonomous\",\n        \"installation_date\": \"2021-02-03T11:55:00-08:00\",\n        \"power_reading\": [\n            {\n                \"timestamp\": \"2021-02-07T16:38:56-08:00\",\n                \"load_power\": 892,\n                \"solar_power\": 626,\n                \"grid_power\": -644,\n                \"battery_power\": 910,\n                \"generator_power\": 0\n            }\n        ],\n        \"version\": \"20.40.3\",\n        \"battery_count\": 2\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Battery Status",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}/status",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"powerwalls",
+										"{{battery_id}}",
+										"status"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Battery Status",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}/status",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"powerwalls",
+												"{{battery_id}}",
+												"status"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:49:26 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "190"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "84498098f6471866a3c0aebc416019b8"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"7ac7e8afcc9fd3ad56470ab5450576fb\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "70e8fe318febb152183c579c849b7cf670e8fe318febb152183c579c849b7cf6"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.059729"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"site_name\": \"My Home\",\n        \"id\": \"XXXXXXX-XX-X--XXXXXXXXXXXXXX\",\n        \"energy_left\": 25101.736842105263,\n        \"total_pack_energy\": 27707,\n        \"percentage_charged\": 90.59709402716015,\n        \"battery_power\": 960\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Battery Power Time-series Data Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}/powerhistory",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"powerwalls",
+										"{{battery_id}}",
+										"powerhistory"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Battery Power Time-series Data Copy",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}/powerhistory",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"powerwalls",
+												"{{battery_id}}",
+												"powerhistory"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:50:15 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept-Encoding"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "7cc1422e12619173a644cc3a384aa94f"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"d7c9caa49b2ae9e38a380626f461b8fe\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "8e8644adc4b5f745e87e74cee21a45bc8e8644adc4b5f745e87e74cee21a45bc"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.157660"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"serial_number\": \"XXXXXXX-XX-X--XXXXXXXXXXXXXX\",\n        \"time_series\": [\n            {\n                \"timestamp\": \"2021-02-06T00:00:00-08:00\",\n                \"solar_power\": 0,\n                \"battery_power\": 0,\n                \"grid_power\": 1637.9,\n                \"grid_services_power\": 0,\n                \"generator_power\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-06T00:05:00-08:00\",\n                \"solar_power\": 0,\n                \"battery_power\": 0,\n                \"grid_power\": 1549.6,\n                \"grid_services_power\": 0,\n                \"generator_power\": 0\n            }\n        ],\n        \"self_consumption_data\": [\n            {\n                \"timestamp\": \"2021-02-06T00:00:00-08:00\",\n                \"solar\": 11.698643001306571,\n                \"battery\": 21.01725785168676\n            },\n            {\n                \"timestamp\": \"2021-02-07T00:00:00-08:00\",\n                \"solar\": 48.34816081990498,\n                \"battery\": 50.999992313760146\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Battery Energy Time-series Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/powerwalls/{{battery_id}}/energyhistory",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"powerwalls",
+										"{{battery_id}}",
+										"energyhistory"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Energy SItes",
+			"item": [
+				{
+					"name": "State and Settings",
+					"item": [
+						{
+							"name": "Site Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/live_status",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"energy_sites",
+										"{{site_id}}",
+										"live_status"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Site Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/live_status",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"energy_sites",
+												"{{site_id}}",
+												"live_status"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:51:46 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "123"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "b573356ca7c0268ba6d8b3c0a3f40f4d"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"1674634da7773b204dc876ed529139f3\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "a8ab5ccb57758aaf87a562c8d13712ffa8ab5ccb57758aaf87a562c8d13712ff"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.134756"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"solar_power\": 0,\n        \"grid_status\": \"Unknown\",\n        \"grid_services_active\": false,\n        \"timestamp\": \"2021-02-07T16:51:46-08:00\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Site Configuration",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/site_info",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"energy_sites",
+										"{{site_id}}",
+										"site_info"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Site Configuration",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/site_info",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"energy_sites",
+												"{{site_id}}",
+												"site_info"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:51:55 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept-Encoding"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "c958a7884180ca53d4c6a2a926f10016"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"948cd86b6e36c88ac47a78a3c05e8317\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "a814e0cff2ec5832d7aab9ab58188af9a814e0cff2ec5832d7aab9ab58188af9"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.185506"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"id\": \"69828b29-83f7-4901-b6a3-17fcc7c8db5b\",\n        \"site_number\": \"XXXXXXXXXXX-XXXXX\",\n        \"installation_date\": \"2021-01-26T16:00:00-08:00\",\n        \"user_settings\": {\n            \"storm_mode_enabled\": null,\n            \"sync_grid_alert_enabled\": false,\n            \"breaker_alert_enabled\": false\n        },\n        \"components\": {\n            \"solar\": true,\n            \"solar_type\": \"pv_panel\",\n            \"battery\": false,\n            \"grid\": true,\n            \"backup\": false,\n            \"gateway\": \"neo\",\n            \"load_meter\": false,\n            \"tou_capable\": false,\n            \"storm_mode_capable\": false,\n            \"flex_energy_request_capable\": false,\n            \"car_charging_data_supported\": false,\n            \"off_grid_vehicle_charging_reserve_supported\": false,\n            \"vehicle_charging_performance_view_enabled\": false,\n            \"vehicle_charging_solar_offset_view_enabled\": false,\n            \"battery_solar_offset_view_enabled\": false,\n            \"configurable\": false,\n            \"grid_services_enabled\": false\n        },\n        \"time_zone_offset\": -480\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "Historical Data",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/history?kind=energy&period=week",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"energy_sites",
+										"{{site_id}}",
+										"history"
+									],
+									"query": [
+										{
+											"key": "kind",
+											"value": "energy"
+										},
+										{
+											"key": "period",
+											"value": "week",
+											"description": "day, week, month, year"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Historical Data",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/energy_sites/{{site_id}}/history?kind=energy&period=week",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"energy_sites",
+												"{{site_id}}",
+												"history"
+											],
+											"query": [
+												{
+													"key": "kind",
+													"value": "energy"
+												},
+												{
+													"key": "period",
+													"value": "week",
+													"description": "day, week, month, year"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Mon, 08 Feb 2021 00:52:52 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "Vary",
+											"value": "Accept-Encoding"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "9790e5c33b8ae4c494e82e106d590b74"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"0bf13e250556dcdc10ed182b85c668d9\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "54aa1226725203dc0da560909175900054aa1226725203dc0da5609091759000"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.243632"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										},
+										{
+											"key": "Content-Encoding",
+											"value": "gzip"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"serial_number\": \"69828b29-83f7-4901-b6a3-17fcc7c8db5b\",\n        \"period\": \"week\",\n        \"time_series\": [\n            {\n                \"timestamp\": \"2021-01-31T01:00:00-08:00\",\n                \"solar_energy_exported\": 21560,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-01T01:00:00-08:00\",\n                \"solar_energy_exported\": 25210,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-02T01:00:00-08:00\",\n                \"solar_energy_exported\": 13599.999999999995,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-03T01:00:00-08:00\",\n                \"solar_energy_exported\": 29940,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-04T01:00:00-08:00\",\n                \"solar_energy_exported\": 30230,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-05T01:00:00-08:00\",\n                \"solar_energy_exported\": 30130,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            },\n            {\n                \"timestamp\": \"2021-02-06T01:00:00-08:00\",\n                \"solar_energy_exported\": 30140,\n                \"generator_energy_exported\": 0,\n                \"grid_energy_imported\": 0,\n                \"grid_services_energy_imported\": 0,\n                \"grid_services_energy_exported\": 0,\n                \"grid_energy_exported_from_solar\": 0,\n                \"grid_energy_exported_from_generator\": 0,\n                \"grid_energy_exported_from_battery\": 0,\n                \"battery_energy_exported\": 0,\n                \"battery_energy_imported_from_grid\": 0,\n                \"battery_energy_imported_from_solar\": 0,\n                \"battery_energy_imported_from_generator\": 0,\n                \"consumer_energy_imported_from_grid\": 0,\n                \"consumer_energy_imported_from_solar\": 0,\n                \"consumer_energy_imported_from_battery\": 0,\n                \"consumer_energy_imported_from_generator\": 0\n            }\n        ]\n    }\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Preferences",
+			"item": [
+				{
+					"name": "Device",
+					"item": [
+						{
+							"name": "Deactivate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/device/{{device_token}}/deactivate",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"device",
+										"{{device_token}}",
+										"deactivate"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Subscriptions",
+					"item": [
+						{
+							"name": "Subscriptions",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/vehicle_subscriptions",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"vehicle_subscriptions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Notifications",
+					"item": [
+						{
+							"name": "Notifications",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/notification_preferences",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"notification_preferences"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Logs",
+			"item": [
+				{
+					"name": "Diagnostics",
+					"item": [
+						{
+							"name": "Entitlements",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"response has attribute: eligible\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.response.eligible).to.be.a('boolean');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://{{base_url}}/api/1/diagnostics",
+									"protocol": "https",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"1",
+										"diagnostics"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Entitlements",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "https://{{base_url}}/api/1/diagnostics",
+											"protocol": "https",
+											"host": [
+												"{{base_url}}"
+											],
+											"path": [
+												"api",
+												"1",
+												"diagnostics"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Date",
+											"value": "Sun, 07 Feb 2021 23:53:46 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Content-Length",
+											"value": "31"
+										},
+										{
+											"key": "Connection",
+											"value": "keep-alive"
+										},
+										{
+											"key": "X-Frame-Options",
+											"value": "SAMEORIGIN"
+										},
+										{
+											"key": "X-XSS-Protection",
+											"value": "1; mode=block"
+										},
+										{
+											"key": "X-Content-Type-Options",
+											"value": "nosniff"
+										},
+										{
+											"key": "X-TXID",
+											"value": "f0fa8ca962f64ac18fb169a5b723517d"
+										},
+										{
+											"key": "ETag",
+											"value": "W/\"b91b388763a4c848984592a32114d830\""
+										},
+										{
+											"key": "Cache-Control",
+											"value": "max-age=0, private, must-revalidate"
+										},
+										{
+											"key": "X-Request-Id",
+											"value": "4a7f29e8eedb8ba8adda9a694a9781db4a7f29e8eedb8ba8adda9a694a9781db"
+										},
+										{
+											"key": "X-Runtime",
+											"value": "0.008049"
+										},
+										{
+											"key": "Strict-Transport-Security",
+											"value": "max-age=15724800; includeSubDomains"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"response\": {\n        \"eligible\": false\n    }\n}"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
